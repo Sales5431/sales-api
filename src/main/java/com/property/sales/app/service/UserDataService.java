@@ -8,11 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
+import java.util.List;
+import java.util.Optional;
+
+import static com.property.sales.app.util.GenericConstants.SEARCH_BY_ID;
+import static com.property.sales.app.util.GenericConstants.SEARCH_BY_NAME;
 
 @Service
 public class UserDataService {
     @Autowired
     UserRepository userRepository;
+
     public void addUserdata(UserRequestData userRequestData) {
         User user = User.builder()
                 .name(populateName(userRequestData))
@@ -43,11 +49,23 @@ public class UserDataService {
         return years;
     }
 
+    public List<User> retrieveAllUserData() {
+        return userRepository.findAll();
+    }
+
     private String populateName(UserRequestData userRequestData) {
         return userRequestData.getFirstName() + GenericConstants.SINGLE_SPACE
                 + userRequestData.getMiddleName() + GenericConstants.SINGLE_SPACE
                 + userRequestData.getLastName();
     }
 
-
+    public Optional<User> retrieveFilteredUser(String searchParam, String searchBy) {
+        if (searchBy.equalsIgnoreCase(SEARCH_BY_ID)) {
+            System.out.println(Long.parseLong(searchParam));
+            return userRepository.findById(Long.parseLong(searchParam));
+        } else if (searchBy.equalsIgnoreCase(SEARCH_BY_NAME)) {
+            return Optional.ofNullable(userRepository.findByName(searchParam));
+        }
+        return Optional.empty();
+    }
 }
